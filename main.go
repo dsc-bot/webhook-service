@@ -63,7 +63,7 @@ func main() {
 		}
 	}()
 
-	utils.Logger.Info("Waiting for messages. To exit press CTRL+C")
+	utils.Logger.Info("Waiting for messages...")
 
 	// keep alive until shutdown signal
 	shutdownCh := make(chan os.Signal, 1)

@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
-	"log"
 	"math"
 	"net/http"
 	"time"
@@ -64,7 +63,7 @@ func sendWebhook(msg Message) bool {
 
 	req, err := http.NewRequest("POST", webhookURL, bytes.NewBuffer(data))
 	if err != nil {
-		log.Printf("Failed to create request: %v", err)
+		Logger.Sugar().Warnf("Failed to create request for %s: %v", webhookURL, err)
 		return false
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -75,16 +74,16 @@ func sendWebhook(msg Message) bool {
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		Logger.Sugar().Debugf("HTTP request failed: %v", err)
+		Logger.Sugar().Warnf("HTTP request to %s, failed: %v", webhookURL, err)
 		return false
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode >= 500 {
-		Logger.Sugar().Debugf("Server error (%d), requeuing message", resp.StatusCode)
+		Logger.Sugar().Infof("Sent webhook to %s, Response: %d (Server error), requeuing message", webhookURL, resp.StatusCode)
 		return false
 	}
 
-	Logger.Sugar().Debugf("Sent webhook to %s, Response: %d", webhookURL, resp.StatusCode)
+	Logger.Sugar().Infof("Sent webhook to %s, Response: %d", webhookURL, resp.StatusCode)
 	return true
 }
 
@@ -95,6 +94,6 @@ func requeueMessage(ch *amqp.Channel, msg Message) {
 		Body:        newMsgBody,
 	})
 	if err != nil {
-		log.Printf("Failed to requeue message: %v", err)
+		Logger.Sugar().Errorf("Failed to requeue message: %v", err)
 	}
 }
