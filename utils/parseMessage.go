@@ -20,8 +20,8 @@ type Message struct {
 	} `json:"webhook"`
 	Data struct {
 		Type        string `json:"type"`
-		BotID       string `json:"bot_id"`
-		UserID      string `json:"user_id"`
+		Bot         string `json:"bot"`
+		User        string `json:"user"`
 		WebhookName string `json:"webhook_name"`
 		Test        bool   `json:"test"`
 		Weight      int    `json:"weight"`
