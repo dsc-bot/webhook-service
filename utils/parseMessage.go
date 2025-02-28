@@ -21,13 +21,29 @@ type Message struct {
 		Type        string `json:"type"`
 		Bot         string `json:"bot"`
 		User        string `json:"user"`
+		BotId       string `json:"bot_id"`
+		UserId      string `json:"user_id"`
+		ListingId   string `json:"listing_id"`
 		WebhookName string `json:"webhook_name"`
 		Test        bool   `json:"test"`
 		Weight      int    `json:"weight"`
 		Query       string `json:"query"`
 	} `json:"data"`
-	Count  int   `json:"count,omitempty"`
-	SentAt int64 `json:"sentAt,omitempty"`
+	Version int   `json:"version"`
+	Count   int   `json:"count"`
+	SentAt  int64 `json:"sentAt"`
+}
+
+func (msg *Message) DeprecatedFields() {
+	// Support older webhooks
+	if msg.Version == 0 {
+		if msg.Data.Bot == "" && msg.Data.BotId != "" {
+			msg.Data.Bot = msg.Data.BotId
+		}
+		if msg.Data.User == "" && msg.Data.UserId != "" {
+			msg.Data.User = msg.Data.UserId
+		}
+	}
 }
 
 func ProcessMessage(ch *amqp.Channel, msg amqp.Delivery) {
@@ -37,9 +53,10 @@ func ProcessMessage(ch *amqp.Channel, msg amqp.Delivery) {
 		return
 	}
 
+	parsedMsg.DeprecatedFields()
 	count := parsedMsg.Count
 	sentAt := parsedMsg.SentAt
-	now := time.Now().Unix()
+	now := time.Now().UnixMilli()
 
 	if count >= 2 {
 		delay := int(math.Pow(2, float64(count)))
