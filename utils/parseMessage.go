@@ -56,7 +56,7 @@ func ProcessMessage(ch *amqp.Channel, msg amqp.Delivery) {
 	parsedMsg.DeprecatedFields()
 	count := parsedMsg.Count
 	sentAt := parsedMsg.SentAt
-	now := time.Now().UnixMilli()
+	now := time.Now().Unix()
 
 	if count >= 2 {
 		delay := int(math.Pow(2, float64(count)))
