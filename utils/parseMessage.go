@@ -84,6 +84,7 @@ func sendWebhook(msg Message) bool {
 		return false
 	}
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "DscBot-Webhook/1.0 (+https://dsc.bot)")
 	if token != nil {
 		req.Header.Set("Authorization", *token)
 	}
